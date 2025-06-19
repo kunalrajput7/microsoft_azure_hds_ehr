@@ -1,0 +1,4 @@
+Create a new folder called "dataset".
+This folder should contain all the JSON files of the FHIR data for each patient.
+These files will be directly used in our "backend" folder by our data-pipeline -> "load_data.py" for loading the data to our PostgresSQL database
+And also by our backend FastAPI server -> "main.py".
