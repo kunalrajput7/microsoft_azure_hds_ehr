@@ -171,3 +171,206 @@ def parse_encounter_data(folder_path):
             print(f"Error reading file {filename}: {e}")
 
     return encounters
+
+
+def parse_condition_data(folder_path):
+    conditions = []
+
+    for filename in os.listdir(folder_path):
+        if not filename.endswith('.json'):
+            continue
+
+        try:
+            with open(os.path.join(folder_path, filename), encoding='utf-8') as f:
+                data = json.load(f)
+
+            for entry in data.get("entry", []):
+                resource = entry.get("resource", {})
+                if resource.get("resourceType") != "Condition":
+                    continue
+
+                try:
+                    condition_id = resource.get("id")
+                    patient_ref = resource.get("subject", {}).get("reference", "")
+                    patient_id = patient_ref.replace("urn:uuid:", "") if patient_ref else None
+
+                    encounter_ref = resource.get("encounter", {}).get("reference", "")
+                    encounter_id = encounter_ref.replace("urn:uuid:", "") if encounter_ref else None
+
+                    clinical_status = resource.get("clinicalStatus", {}).get("coding", [{}])[0].get("code")
+                    verification_status = resource.get("verificationStatus", {}).get("coding", [{}])[0].get("code")
+                    category = resource.get("category", [{}])[0].get("coding", [{}])[0].get("display")
+
+                    code = resource.get("code", {}).get("coding", [{}])[0].get("code")
+                    description = resource.get("code", {}).get("coding", [{}])[0].get("display")
+
+                    onset = resource.get("onsetDateTime")
+                    onset_date = datetime.fromisoformat(onset) if onset else None
+
+                    recorded = resource.get("recordedDate")
+                    recorded_date = datetime.fromisoformat(recorded) if recorded else None
+
+                    conditions.append({
+                        "id": condition_id,
+                        "patient_id": patient_id,
+                        "encounter_id": encounter_id,
+                        "clinical_status": clinical_status,
+                        "verification_status": verification_status,
+                        "category": category,
+                        "code": code,
+                        "description": description,
+                        "onset_date": onset_date,
+                        "recorded_date": recorded_date
+                    })
+
+                except Exception as e:
+                    print(f"Error parsing Condition in {filename}: {e}")
+
+        except Exception as e:
+            print(f"Error reading file {filename}: {e}")
+
+    return conditions
+
+
+def parse_observation_data(folder_path):
+    observations = []
+
+    for filename in os.listdir(folder_path):
+        if not filename.endswith('.json'):
+            continue
+
+        try:
+            with open(os.path.join(folder_path, filename), encoding='utf-8') as f:
+                data = json.load(f)
+
+            for entry in data.get("entry", []):
+                resource = entry.get("resource", {})
+                if resource.get("resourceType") != "Observation":
+                    continue
+
+                try:
+                    observation_id = resource.get("id")
+                    patient_ref = resource.get("subject", {}).get("reference", "")
+                    patient_id = patient_ref.replace("urn:uuid:", "") if patient_ref else None
+
+                    encounter_ref = resource.get("encounter", {}).get("reference", "")
+                    encounter_id = encounter_ref.replace("urn:uuid:", "") if encounter_ref else None
+
+                    status = resource.get("status")
+
+                    category = resource.get("category", [{}])[0].get("coding", [{}])[0].get("code")
+
+                    code = resource.get("code", {}).get("coding", [{}])[0].get("code")
+                    description = resource.get("code", {}).get("coding", [{}])[0].get("display")
+
+                    value_quantity = resource.get("valueQuantity", {})
+                    value = value_quantity.get("value")
+                    unit = value_quantity.get("unit")
+
+                    effective = resource.get("effectiveDateTime")
+                    issued = resource.get("issued")
+
+                    effective_date = datetime.fromisoformat(effective) if effective else None
+                    issued_date = datetime.fromisoformat(issued) if issued else None
+
+                    observations.append({
+                        "id": observation_id,
+                        "patient_id": patient_id,
+                        "encounter_id": encounter_id,
+                        "status": status,
+                        "category": category,
+                        "code": code,
+                        "description": description,
+                        "value": value,
+                        "unit": unit,
+                        "effective_date": effective_date,
+                        "issued_date": issued_date
+                    })
+
+                except Exception as e:
+                    print(f"Error parsing Observation in {filename}: {e}")
+
+        except Exception as e:
+            print(f"Error reading file {filename}: {e}")
+
+    return observations
+
+
+def parse_medication_data(folder_path):
+    medications = []
+    medication_lookup = {}
+
+    # First pass: build a lookup for Medication resource (id → name/code)
+    for filename in os.listdir(folder_path):
+        if not filename.endswith('.json'):
+            continue
+
+        with open(os.path.join(folder_path, filename), encoding='utf-8') as f:
+            data = json.load(f)
+
+        for entry in data.get("entry", []):
+            resource = entry.get("resource", {})
+            if resource.get("resourceType") == "Medication":
+                med_id = resource.get("id")
+                code = resource.get("code", {}).get("coding", [{}])[0].get("code")
+                name = resource.get("code", {}).get("coding", [{}])[0].get("display")
+                medication_lookup[med_id] = {
+                    "code": code,
+                    "name": name
+                }
+
+    # Second pass: extract MedicationRequest and join with Medication
+    for filename in os.listdir(folder_path):
+        if not filename.endswith('.json'):
+            continue
+
+        try:
+            with open(os.path.join(folder_path, filename), encoding='utf-8') as f:
+                data = json.load(f)
+
+            for entry in data.get("entry", []):
+                resource = entry.get("resource", {})
+                if resource.get("resourceType") != "MedicationRequest":
+                    continue
+
+                try:
+                    med_id = resource.get("id")
+                    patient_ref = resource.get("subject", {}).get("reference", "")
+                    patient_id = patient_ref.replace("urn:uuid:", "") if patient_ref else None
+
+                    encounter_ref = resource.get("encounter", {}).get("reference", "")
+                    encounter_id = encounter_ref.replace("urn:uuid:", "") if encounter_ref else None
+
+                    medication_ref = resource.get("medicationReference", {}).get("reference", "")
+                    medication_uuid = medication_ref.replace("urn:uuid:", "") if medication_ref else None
+                    med_data = medication_lookup.get(medication_uuid, {})
+
+                    status = resource.get("status")
+                    intent = resource.get("intent")
+                    category = resource.get("category", [{}])[0].get("coding", [{}])[0].get("display")
+
+                    authored_on_raw = resource.get("authoredOn")
+                    authored_on = datetime.fromisoformat(authored_on_raw) if authored_on_raw else None
+
+                    reason = resource.get("reasonReference", [{}])[0].get("display")
+
+                    medications.append({
+                        "id": med_id,
+                        "patient_id": patient_id,
+                        "encounter_id": encounter_id,
+                        "medication_code": med_data.get("code"),
+                        "medication_name": med_data.get("name"),
+                        "status": status,
+                        "intent": intent,
+                        "category": category,
+                        "authored_on": authored_on,
+                        "reason": reason
+                    })
+
+                except Exception as e:
+                    print(f"Error parsing MedicationRequest in {filename}: {e}")
+
+        except Exception as e:
+            print(f"Error reading file {filename}: {e}")
+
+    return medications

@@ -22,7 +22,6 @@ class Patient(Base):
     postal_code = Column(String)
     country = Column(String)
 
-
 class Encounter(Base):
     __tablename__ = "encounters"
 
@@ -35,3 +34,46 @@ class Encounter(Base):
     location_name = Column(String)
     start_time = Column(DateTime)
     end_time = Column(DateTime)
+
+class Condition(Base):
+    __tablename__ = "conditions"
+
+    id = Column(String, primary_key=True, index=True)
+    patient_id = Column(String, ForeignKey("patients.id"))
+    encounter_id = Column(String, ForeignKey("encounters.id"), nullable=True)
+    clinical_status = Column(String)
+    verification_status = Column(String)
+    category = Column(String)
+    code = Column(String)
+    description = Column(String)
+    onset_date = Column(DateTime)
+    recorded_date = Column(DateTime)
+
+class Observation(Base):
+    __tablename__ = "observations"
+
+    id = Column(String, primary_key=True, index=True)
+    patient_id = Column(String, ForeignKey("patients.id"))
+    encounter_id = Column(String, ForeignKey("encounters.id"), nullable=True)
+    status = Column(String)
+    category = Column(String)
+    code = Column(String)
+    description = Column(String)
+    value = Column(String)  # or Float if strictly numeric
+    unit = Column(String)
+    effective_date = Column(DateTime)
+    issued_date = Column(DateTime)
+
+class Medication(Base):
+    __tablename__ = "medications"
+
+    id = Column(String, primary_key=True, index=True)
+    patient_id = Column(String, ForeignKey("patients.id"))
+    encounter_id = Column(String, ForeignKey("encounters.id"), nullable=True)
+    medication_code = Column(String)
+    medication_name = Column(String)
+    status = Column(String)
+    intent = Column(String)
+    category = Column(String)
+    authored_on = Column(DateTime)
+    reason = Column(String)
