@@ -1,1 +1,41 @@
-/dataset
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# FastAPI logs or temp files
+*.log
+
+# Virtual environment
+venv/
+.env
+.env.*
+
+# Pytest / coverage / test cache
+.cache/
+coverage.xml
+htmlcov/
+
+# Database temp/backup files
+*.sqlite3
+
+# VSCode settings
+.vscode/
+
+# Jupyter notebooks (if you use any)
+*.ipynb_checkpoints
+
+# Mac/Linux/Windows specific
+.DS_Store
+Thumbs.db
+
+# React frontend build
+frontend/node_modules/
+frontend/.env
+frontend/build/
+frontend/dist/
+frontend/.next/
+
+
+# dataset folder (too large in size)
+dataset/
