@@ -77,3 +77,18 @@ class Medication(Base):
     category = Column(String)
     authored_on = Column(DateTime)
     reason = Column(String)
+
+class ImagingStudy(Base):
+    __tablename__ = "imaging_studies"
+
+    id = Column(String, primary_key=True, index=True)
+    patient_id = Column(String, ForeignKey("patients.id"))
+    encounter_id = Column(String, ForeignKey("encounters.id"), nullable=True)
+    status = Column(String)
+    started = Column(DateTime)
+    procedure_code = Column(String)
+    procedure_display = Column(String)
+    modality_code = Column(String)
+    modality_display = Column(String)
+    body_site = Column(String)
+    dicom_uid = Column(String)

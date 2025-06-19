@@ -374,3 +374,64 @@ def parse_medication_data(folder_path):
             print(f"Error reading file {filename}: {e}")
 
     return medications
+
+def parse_imaging_data(folder_path):
+    imaging_studies = []
+
+    for filename in os.listdir(folder_path):
+        if not filename.endswith('.json'):
+            continue
+
+        try:
+            with open(os.path.join(folder_path, filename), encoding="utf-8") as f:
+                data = json.load(f)
+
+            for entry in data.get("entry", []):
+                resource = entry.get("resource", {})
+                if resource.get("resourceType") != "ImagingStudy":
+                    continue
+
+                try:
+                    study_id = resource.get("id")
+                    patient_ref = resource.get("subject", {}).get("reference", "")
+                    patient_id = patient_ref.replace("urn:uuid:", "") if patient_ref else None
+
+                    encounter_ref = resource.get("encounter", {}).get("reference", "")
+                    encounter_id = encounter_ref.replace("urn:uuid:", "") if encounter_ref else None
+
+                    status = resource.get("status")
+                    started_raw = resource.get("started")
+                    started = datetime.fromisoformat(started_raw) if started_raw else None
+
+                    procedure_code = resource.get("procedureCode", [{}])[0].get("coding", [{}])[0].get("code")
+                    procedure_display = resource.get("procedureCode", [{}])[0].get("coding", [{}])[0].get("display")
+
+                    # Only taking first series for now
+                    series = resource.get("series", [{}])[0]
+                    modality_code = series.get("modality", {}).get("code")
+                    modality_display = series.get("modality", {}).get("display")
+
+                    body_site = series.get("bodySite", {}).get("display")
+                    dicom_uid = series.get("uid")  # Series UID
+
+                    imaging_studies.append({
+                        "id": study_id,
+                        "patient_id": patient_id,
+                        "encounter_id": encounter_id,
+                        "status": status,
+                        "started": started,
+                        "procedure_code": procedure_code,
+                        "procedure_display": procedure_display,
+                        "modality_code": modality_code,
+                        "modality_display": modality_display,
+                        "body_site": body_site,
+                        "dicom_uid": dicom_uid
+                    })
+
+                except Exception as e:
+                    print(f"Error parsing ImagingStudy in {filename}: {e}")
+
+        except Exception as e:
+            print(f"Error reading file {filename}: {e}")
+
+    return imaging_studies
