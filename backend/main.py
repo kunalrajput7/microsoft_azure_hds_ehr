@@ -1,6 +1,7 @@
 # backend/main.py
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
+from ml.glucose_model import predict_glucose_anomalies
 from db import SessionLocal, engine
 from models import (
     Patient, Encounter, Condition, Observation,
@@ -102,3 +103,9 @@ def get_all_dicom_images(db: Session = Depends(get_db)):
 @app.get("/dicom-images/{patient_id}")
 def get_dicom_images_by_patient(patient_id: str, db: Session = Depends(get_db)):
     return db.query(DICOMImage).filter(DICOMImage.patient_id == patient_id).all()
+
+
+@app.get("/predict-glucose/{patient_id}")
+def glucose_prediction(patient_id: str):
+    result = predict_glucose_anomalies(patient_id)
+    return result
