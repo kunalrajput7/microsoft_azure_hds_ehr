@@ -1,7 +1,7 @@
 sqlalchemy
 psycopg2
 fhir.resources
-fastapi
+fastapi[all]
 uvicorn
 psycopg2-binary
 pydantic
