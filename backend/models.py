@@ -1,4 +1,3 @@
-# backend/models.py
 from sqlalchemy import Column, String, Date, ForeignKey, DateTime
 from db import Base
 
@@ -92,3 +91,15 @@ class ImagingStudy(Base):
     modality_display = Column(String)
     body_site = Column(String)
     dicom_uid = Column(String)
+
+# THIS MODEL IS FOR THE DICOM METADATA STORAGE WHICH WILL ALSO BE USED TO STORED THE PREDICTIONS ONCES THE AI MODEL RUNS
+
+class DICOMImage(Base):
+    __tablename__ = "dicom_images"
+
+    id = Column(String, primary_key=True, index=True)
+    patient_id = Column(String)
+    file_path = Column(String)
+    study_date = Column(DateTime, nullable=True)
+    modality = Column(String, nullable=True)
+    prediction = Column(String, nullable=True)   # Will be filled after AI inference

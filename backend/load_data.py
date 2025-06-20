@@ -1,7 +1,9 @@
 # backend/load_data.py
+import os
 from db import SessionLocal, engine
-from models import Base, Patient, Encounter, Condition, Observation, Medication, ImagingStudy
+from models import Base, DICOMImage, Patient, Encounter, Condition, Observation, Medication, ImagingStudy
 from fhir_parser import parse_patient_data, parse_encounter_data, parse_condition_data, parse_observation_data, parse_medication_data, parse_imaging_data
+from dicom_parser import parse_dicom_data
 
 # 1. Create all tables (only if not exist)
 Base.metadata.create_all(bind=engine)
@@ -15,8 +17,11 @@ observations = parse_observation_data(data_folder)
 medications = parse_medication_data(data_folder)
 imaging_studies = parse_imaging_data(data_folder)
 
+# 3. Parse DICOM
+dicom_folder = os.path.join(data_folder, "rsna/train_dicom")
+dicoms = parse_dicom_data(dicom_folder, base_folder=data_folder)
 
-# 3. Insert into DB
+# 4. Insert into DB
 session = SessionLocal()
 
 # Insert patients
@@ -40,6 +45,9 @@ for m in medications:
 for i in imaging_studies:
     session.merge(ImagingStudy(**i))
 
+for d in dicoms:
+    session.merge(DICOMImage(**d))
+
 # Commit and close
 session.commit()
 session.close()
@@ -50,4 +58,4 @@ print(f"✅ Loaded {len(conditions)} conditions into database.")
 print(f"✅ Loaded {len(observations)} observations into database.")
 print(f"✅ Loaded {len(medications)} medications into database.")
 print(f"✅ Loaded {len(imaging_studies)} imaging studies into database.")
-
+print(f"✅ Loaded {len(dicoms)} DICOM images.")
