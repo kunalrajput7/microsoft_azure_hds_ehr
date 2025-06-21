@@ -103,3 +103,18 @@ class DICOMImage(Base):
     study_date = Column(DateTime, nullable=True)
     modality = Column(String, nullable=True)
     prediction = Column(String, nullable=True)   # Will be filled after AI inference
+    
+    
+
+class PatientObservationSummary(Base):
+    __tablename__ = "patient_observation_summary"
+
+    patient_id = Column(String, primary_key=True, index=True)
+    glucose = Column(String, nullable=True)
+    glucose_unit = Column(String, nullable=True)
+    bmi = Column(String, nullable=True)
+    bmi_unit = Column(String, nullable=True)
+    systolic_bp = Column(String, nullable=True)
+    systolic_unit = Column(String, nullable=True)
+    diastolic_bp = Column(String, nullable=True)
+    diastolic_unit = Column(String, nullable=True)

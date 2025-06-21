@@ -2,7 +2,7 @@
 import os
 from db import SessionLocal, engine
 from models import Base, DICOMImage, Patient, Encounter, Condition, Observation, Medication, ImagingStudy
-from fhir_parser import parse_patient_data, parse_encounter_data, parse_condition_data, parse_observation_data, parse_medication_data, parse_imaging_data
+from fhir_parser import parse_patient_data, parse_encounter_data, parse_condition_data, parse_observation_data, parse_medication_data, parse_imaging_data, generate_patient_observation_summary
 from dicom_parser import parse_dicom_data
 
 # 1. Create all tables (only if not exist)
@@ -47,6 +47,8 @@ for i in imaging_studies:
 
 for d in dicoms:
     session.merge(DICOMImage(**d))
+    
+generate_patient_observation_summary()
 
 # Commit and close
 session.commit()

@@ -232,6 +232,9 @@ def parse_condition_data(folder_path):
     return conditions
 
 
+from datetime import datetime
+import os, json
+
 def parse_observation_data(folder_path):
     observations = []
 
@@ -248,50 +251,71 @@ def parse_observation_data(folder_path):
                 if resource.get("resourceType") != "Observation":
                     continue
 
-                try:
-                    observation_id = resource.get("id")
-                    patient_ref = resource.get("subject", {}).get("reference", "")
-                    patient_id = patient_ref.replace("urn:uuid:", "") if patient_ref else None
+                observation_id = resource.get("id")
+                patient_ref = resource.get("subject", {}).get("reference", "")
+                patient_id = patient_ref.replace("urn:uuid:", "") if patient_ref else None
 
-                    encounter_ref = resource.get("encounter", {}).get("reference", "")
-                    encounter_id = encounter_ref.replace("urn:uuid:", "") if encounter_ref else None
+                encounter_ref = resource.get("encounter", {}).get("reference", "")
+                encounter_id = encounter_ref.replace("urn:uuid:", "") if encounter_ref else None
 
-                    status = resource.get("status")
+                status = resource.get("status")
+                category = resource.get("category", [{}])[0].get("coding", [{}])[0].get("code")
 
-                    category = resource.get("category", [{}])[0].get("coding", [{}])[0].get("code")
+                code_block = resource.get("code", {})
+                code = code_block.get("coding", [{}])[0].get("code")
+                description = code_block.get("coding", [{}])[0].get("display")
 
-                    code = resource.get("code", {}).get("coding", [{}])[0].get("code")
-                    description = resource.get("code", {}).get("coding", [{}])[0].get("display")
+                effective = resource.get("effectiveDateTime")
+                issued = resource.get("issued")
+                effective_date = datetime.fromisoformat(effective) if effective else None
+                issued_date = datetime.fromisoformat(issued) if issued else None
 
+                # --- Case 1: Blood Pressure with components ---
+                if description and "blood pressure" in description.lower() and "component" in resource:
+                    for component in resource["component"]:
+                        comp_code = component["code"]["coding"][0].get("code")
+                        comp_desc = component["code"]["coding"][0].get("display")
+                        comp_value = component.get("valueQuantity", {}).get("value")
+                        comp_unit = component.get("valueQuantity", {}).get("unit")
+
+                        if comp_value is not None:
+                            observations.append({
+                                "id": f"{observation_id}-{comp_code}",  # Make ID unique per component
+                                "patient_id": patient_id,
+                                "encounter_id": encounter_id,
+                                "status": status,
+                                "category": category,
+                                "code": comp_code,
+                                "description": comp_desc,
+                                "value": comp_value,
+                                "unit": comp_unit,
+                                "effective_date": effective_date,
+                                "issued_date": issued_date
+                            })
+
+                # --- Case 2: Normal observation like BMI, Glucose ---
+                else:
                     value_quantity = resource.get("valueQuantity", {})
                     value = value_quantity.get("value")
                     unit = value_quantity.get("unit")
 
-                    effective = resource.get("effectiveDateTime")
-                    issued = resource.get("issued")
-
-                    effective_date = datetime.fromisoformat(effective) if effective else None
-                    issued_date = datetime.fromisoformat(issued) if issued else None
-
-                    observations.append({
-                        "id": observation_id,
-                        "patient_id": patient_id,
-                        "encounter_id": encounter_id,
-                        "status": status,
-                        "category": category,
-                        "code": code,
-                        "description": description,
-                        "value": value,
-                        "unit": unit,
-                        "effective_date": effective_date,
-                        "issued_date": issued_date
-                    })
-
-                except Exception as e:
-                    print(f"Error parsing Observation in {filename}: {e}")
+                    if value is not None:
+                        observations.append({
+                            "id": observation_id,
+                            "patient_id": patient_id,
+                            "encounter_id": encounter_id,
+                            "status": status,
+                            "category": category,
+                            "code": code,
+                            "description": description,
+                            "value": value,
+                            "unit": unit,
+                            "effective_date": effective_date,
+                            "issued_date": issued_date
+                        })
 
         except Exception as e:
-            print(f"Error reading file {filename}: {e}")
+            print(f"⚠️ Error parsing {filename}: {e}")
 
     return observations
 
@@ -435,3 +459,67 @@ def parse_imaging_data(folder_path):
             print(f"Error reading file {filename}: {e}")
 
     return imaging_studies
+
+
+# backend/fhir_summary_parser.py
+
+from db import SessionLocal
+from models import Observation, PatientObservationSummary
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+
+def generate_patient_observation_summary():
+    db: Session = SessionLocal()
+    try:
+        print("🟡 Generating patient observation summaries...")
+
+        # Get unique patient IDs from observations
+        patient_ids = db.query(Observation.patient_id).distinct().all()
+
+        for (patient_id,) in patient_ids:
+            # Glucose
+            glucose_obs = db.query(Observation).filter(
+                Observation.patient_id == patient_id,
+                Observation.description.ilike('%glucose%'),
+                Observation.value != None
+            ).order_by(Observation.effective_date.desc()).first()
+
+            # BMI
+            bmi_obs = db.query(Observation).filter(
+                Observation.patient_id == patient_id,
+                Observation.description.ilike('%bmi%'),
+                Observation.value != None
+            ).order_by(Observation.effective_date.desc()).first()
+
+            # Systolic BP
+            sys_obs = db.query(Observation).filter(
+                Observation.patient_id == patient_id,
+                Observation.description.ilike('%systolic%'),
+                Observation.value != None
+            ).order_by(Observation.effective_date.desc()).first()
+
+            # Diastolic BP
+            dia_obs = db.query(Observation).filter(
+                Observation.patient_id == patient_id,
+                Observation.description.ilike('%diastolic%'),
+                Observation.value != None
+            ).order_by(Observation.effective_date.desc()).first()
+
+            summary = PatientObservationSummary(
+                patient_id=patient_id,
+                glucose=glucose_obs.value if glucose_obs else None,
+                glucose_unit=glucose_obs.unit if glucose_obs else None,
+                bmi=bmi_obs.value if bmi_obs else None,
+                bmi_unit=bmi_obs.unit if bmi_obs else None,
+                systolic_bp=sys_obs.value if sys_obs else None,
+                systolic_unit=sys_obs.unit if sys_obs else None,
+                diastolic_bp=dia_obs.value if dia_obs else None,
+                diastolic_unit=dia_obs.unit if dia_obs else None,
+            )
+
+            db.merge(summary)  # Insert or update
+        db.commit()
+        print("✅ Patient observation summaries generated.")
+
+    finally:
+        db.close()

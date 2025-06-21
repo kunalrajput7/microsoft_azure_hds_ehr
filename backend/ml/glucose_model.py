@@ -16,7 +16,7 @@ def predict_glucose_anomalies(patient_id: str):
         # Get glucose observations for patient
         records = db.query(Observation).filter(
             Observation.patient_id == patient_id,
-            Observation.description.ilike('%glucose%'),
+            Observation.description.ilike('%Glucose [Mass/volume] in Blood%'),
             Observation.value != None
         ).all()
 
