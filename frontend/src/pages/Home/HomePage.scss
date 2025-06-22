@@ -1,0 +1,55 @@
+// src/pages/Home/HomePage.scss
+.homepage {
+  padding: 30px 20px;
+  margin-left: 80px;
+  background: rgb(232, 255, 255);
+  min-height: 100vh;
+
+  h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 28px;
+    color: #0b1c2c;
+  }
+
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    grid-auto-rows: auto;
+    gap: 24px;
+
+    .chart-card {
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+      color: #333;
+      transition: transform 0.2s ease;
+
+      &:hover {
+        transform: scale(1.01);
+      }
+
+      h3 {
+        margin-bottom: 12px;
+        font-size: 18px;
+        text-align: center;
+      }
+    }
+
+    // Specific background colors per chart (ordered same as HomePage.js)
+    .chart-card:nth-child(1) { background: #e0f7fa; } // Gender
+    .chart-card:nth-child(2) { background: #f1f8e9; } // Race
+    .chart-card:nth-child(3) { background: #fff3e0; } // Conditions
+    .chart-card:nth-child(4) { background: #ede7f6; } // Medications
+    .chart-card:nth-child(5) { background: #fce4ec; } // Encounter
+    .chart-card:nth-child(6) { background: #f3e5f5; } // Imaging
+    .chart-card:nth-child(7) { background: #e8f5e9; } // Vitals
+  }
+
+  .loading {
+    text-align: center;
+    font-size: 20px;
+    margin-top: 100px;
+    color: #666;
+  }
+}

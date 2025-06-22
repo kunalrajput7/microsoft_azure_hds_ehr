@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import './App.css'; // optional global styling
+import HomePage from './pages/Home/HomePage';
 
 const App = () => {
   return (
@@ -11,7 +12,7 @@ const App = () => {
         <Navbar />
         <div className="main-content">
           {/* Add routes here */}
-          <h1>Welcome to the Home Page</h1>
+          <HomePage />
         </div>
       </div>
     </Router>
