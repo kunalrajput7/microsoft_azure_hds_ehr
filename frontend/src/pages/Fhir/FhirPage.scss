@@ -1,0 +1,91 @@
+// src/pages/Fhir/FhirPage.scss
+
+.fhir-page {
+  display: flex;
+  height: 100vh;
+  gap: 24px;
+  font-family: "Raleway", sans-serif;
+  background: rgb(232, 255, 255);
+
+  .left-panel {
+    width: 70%;
+    padding: 24px;
+    overflow-y: auto;
+
+    h2 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      color: #0b1c2c;
+    }
+
+    .selector {
+      margin-bottom: 24px;
+
+      select {
+        padding: 10px;
+        width: 60%;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+      }
+    }
+
+    .patient-info {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+
+      h3 {
+        margin-bottom: 16px;
+        color: #0b1c2c;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 12px;
+
+        p {
+          background: #f9f9f9;
+          padding: 10px;
+          border-radius: 8px;
+        }
+      }
+    }
+  }
+
+  .right-panel {
+    width: 30%;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.7);
+    border-left: 1px solid #ddd;
+    overflow-y: auto;
+
+    h3 {
+      margin-bottom: 20px;
+      color: #0b1c2c;
+    }
+
+    .prediction-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+
+      .card {
+        background: #f5faff;
+        border-left: 6px solid #00bcd4;
+        padding: 16px;
+        border-radius: 10px;
+
+        h4 {
+          margin-bottom: 8px;
+          font-weight: 600;
+        }
+
+        p {
+          margin: 4px 0;
+        }
+      }
+    }
+  }
+}

@@ -23,29 +23,18 @@ const HomePage = () => {
 
   return (
     <div className="homepage">
-      <h1>📊 EHR Global Statistics</h1>
+      <h1>Welcome Dr. Kunal, here’s your EHR dashboard overview:</h1>
       <div className="chart-grid">
-        <div className="chart-card card-gender">
-          <GenderChart data={stats.gender_distribution} />
-        </div>
-        <div className="chart-card card-race">
-          <RaceChart data={stats.race_distribution} />
-        </div>
-        <div className="chart-card card-condition">
+        <GenderChart data={stats.gender_distribution} />
+        <RaceChart data={stats.race_distribution} />
+        <div className="combined">
           <ConditionChart data={stats.top_conditions} />
-        </div>
-        <div className="chart-card card-medication">
+          <div className="divider" />
           <MedicationChart data={stats.top_medications} />
         </div>
-        <div className="chart-card card-encounter">
-          <EncounterChart data={stats.encounter_types} />
-        </div>
-        <div className="chart-card card-imaging">
-          <ImagingChart data={stats.imaging_modalities} />
-        </div>
-        <div className="chart-card card-vitals">
-          <VitalsChart data={stats.vitals_summary} />
-        </div>
+        <EncounterChart data={stats.encounter_types} />
+        <ImagingChart data={stats.imaging_modalities} />
+        <VitalsChart data={stats.vitals_summary} />
       </div>
     </div>
   );
