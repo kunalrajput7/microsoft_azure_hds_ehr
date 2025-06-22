@@ -9,6 +9,8 @@ from models import (
     Medication, ImagingStudy, DICOMImage
 )
 
+from global_stats import get_global_stats
+
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -121,3 +123,8 @@ from ml.readmission_model import predict_readmission
 @app.get("/predict-readmission/{patient_id}")
 def predict_readmission_api(patient_id: str):
     return predict_readmission(patient_id)
+
+
+@app.get("/global-stats")
+def fetch_global_stats():
+    return get_global_stats()

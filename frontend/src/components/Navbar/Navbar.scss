@@ -1,0 +1,65 @@
+// src/components/Navbar/Navbar.scss
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 80px;
+  height: 100vh;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  z-index: 100;
+
+  .logo {
+    img {
+      width: 40px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+  }
+
+  .nav-icons {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; // ✅ vertically center icons
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+
+    a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+
+      img {
+        width: 29px;
+        height: auto;
+        opacity: 0.6;
+        transition: all 0.3s ease;
+      }
+
+      &.active {
+        background-color: rgba(0, 212, 255, 0.2);
+        img {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+      }
+
+      &:hover {
+        img {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+      }
+    }
+  }
+}
