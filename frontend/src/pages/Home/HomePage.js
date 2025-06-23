@@ -6,7 +6,7 @@ import GenderChart from '../../components/Charts/GenderChart';
 import RaceChart from '../../components/Charts/RaceChart';
 import ConditionChart from '../../components/Charts/ConditionChart';
 import MedicationChart from '../../components/Charts/MedicationChart';
-import EncounterChart from '../../components/Charts/EncounterChart';
+import EncounterChart from '../../components/Charts/EncounterPieChart';
 import ImagingChart from '../../components/Charts/ImagingChart';
 import VitalsChart from '../../components/Charts/VitalsChart';
 

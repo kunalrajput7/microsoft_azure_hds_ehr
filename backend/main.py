@@ -8,6 +8,7 @@ from models import (
     Patient, Encounter, Condition, Observation,
     Medication, ImagingStudy, DICOMImage
 )
+from patient_fhir_stats import get_patient_fhir_stats
 
 from global_stats import get_global_stats
 
@@ -128,3 +129,7 @@ def predict_readmission_api(patient_id: str):
 @app.get("/global-stats")
 def fetch_global_stats():
     return get_global_stats()
+
+@app.get("/patient-fhir-stats/{patient_id}")
+def fetch_patient_fhir_stats(patient_id: str):
+    return get_patient_fhir_stats(patient_id)
