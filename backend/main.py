@@ -9,10 +9,12 @@ from models import (
     Medication, ImagingStudy, DICOMImage
 )
 from patient_fhir_stats import get_patient_fhir_stats
-
 from global_stats import get_global_stats
-
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import UploadFile, File
+from ml.dicom_model import predict_pneumonia
+import shutil
+import os
 
 app = FastAPI(
     title="EHR API",
@@ -133,3 +135,15 @@ def fetch_global_stats():
 @app.get("/patient-fhir-stats/{patient_id}")
 def fetch_patient_fhir_stats(patient_id: str):
     return get_patient_fhir_stats(patient_id)
+
+@app.post("/predict-pneumonia")
+async def predict_pneumonia_api(file: UploadFile = File(...)):
+    temp_path = f"temp_uploads/{file.filename}"
+    os.makedirs("temp_uploads", exist_ok=True)
+    with open(temp_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    result = predict_pneumonia(temp_path)
+
+    os.remove(temp_path)
+    return result
