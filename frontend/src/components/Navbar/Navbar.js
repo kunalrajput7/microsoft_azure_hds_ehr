@@ -7,8 +7,11 @@ import "./Navbar.scss";
 const Navbar = () => {
   return (
     <div className="navbar">
+
       <div className="logo">
-        <img src="/logo.png" alt="Logo" />
+        <NavLink to="/" activeclassname="active">
+          <img src="/logo.png" alt="Home" />
+        </NavLink>
       </div>
 
       <div className="nav-icons">
