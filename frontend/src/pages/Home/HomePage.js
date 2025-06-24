@@ -23,7 +23,9 @@ const HomePage = () => {
 
   return (
     <div className="homepage">
-      <h1>Welcome Dr. Kunal, here’s your EHR dashboard overview:</h1>
+      <h1>Welcome
+        <span className="highlight"> Dr. Kunal</span>
+        , here’s your EHR dashboard overview:</h1>
       <div className="chart-grid">
         <GenderChart data={stats.gender_distribution} />
         <RaceChart data={stats.race_distribution} />
